@@ -42,9 +42,9 @@ public class ServerThread implements Runnable {
 			}
 		} catch (IOException e) {
 			clientList.remove(this);
-			String message = "[클라이언트 통신 안됨: " + socket.getRemoteSocketAddress() + ": "
-					+ Thread.currentThread().getName() + " ]";
+			String message = nickName + "님의 연결이 종료되었습니다.";
 			System.out.println(message);
+			sendMessageToAll(message);
 		} finally {
 			try {
 				br.close();
@@ -69,9 +69,13 @@ public class ServerThread implements Runnable {
 		}
 	}
 
-	private void sendMessageToAll(String message) throws IOException {
+	private void sendMessageToAll(String message) {
 		for (ServerThread st : clientList) {
-			st.sendMessage(message);
+			try {
+				st.sendMessage(message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
