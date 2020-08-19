@@ -6,36 +6,36 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Vector;
+import java.util.Queue;
 
 public class ServerThread implements Runnable {
 
-	private Vector<ServerThread> clientList;
+	private Queue<ServerThread> clientList;
 	private Socket socket;
 	private String nickName;
 	private BufferedWriter bw;
 	private BufferedReader br;
 
-	public ServerThread(Socket socket, Vector<ServerThread> clientList) {
+	public ServerThread(Socket socket, Queue<ServerThread> clientList) {
 		this.socket = socket;
 		this.clientList = clientList;
 	}
 
 	@Override
-	public synchronized void run() {
+	public void run() {
 		try {
 			br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
 			while (true) {
-				System.out.println("메시지받기전");
-				if(null == nickName) {
-					nickName = br.readLine();
-					String message = nickName + "님이 접속하셨습니다.";
+				String message = br.readLine();
+
+				if (null == nickName) {
+					nickName = message;
+					message = message + "님이 접속하셨습니다.";
 					System.out.println(message);
 					sendGreeting(message);
 				} else {
-					String message = br.readLine();
 					System.out.println("message >> " + message);
 					sendMessageToAll(message);
 				}
@@ -44,7 +44,6 @@ public class ServerThread implements Runnable {
 			clientList.remove(this);
 			String message = nickName + "님의 연결이 종료되었습니다.";
 			System.out.println(message);
-			sendMessageToAll(message);
 		} finally {
 			try {
 				br.close();
@@ -69,13 +68,9 @@ public class ServerThread implements Runnable {
 		}
 	}
 
-	private void sendMessageToAll(String message) {
+	private void sendMessageToAll(String message) throws IOException {
 		for (ServerThread st : clientList) {
-			try {
-				st.sendMessage(message);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			st.sendMessage(message);
 		}
 	}
 

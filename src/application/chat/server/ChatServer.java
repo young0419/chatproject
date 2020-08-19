@@ -3,13 +3,14 @@ package application.chat.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Vector;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ChatServer {
 
 	private static final int PORT = 9999;
 	private ServerSocket serverSocket;
-	private Vector<ServerThread> clientList = new Vector<ServerThread>();
+	private Queue<ServerThread> clientList = new ConcurrentLinkedQueue<ServerThread>();
 
 	void startServer() {
 
